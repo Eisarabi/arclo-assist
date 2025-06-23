@@ -21,6 +21,7 @@ export default async function handler(req, res) {
   });
 
   const data = await response.json();
+  console.log('OpenAI-Antwort:', JSON.stringify(data, null, 2));
   const data = await response.json();
 
 if (data.choices && data.choices.length > 0 && data.choices[0].message) {
