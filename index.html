@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arclo Assist – GPT</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; color: #222; margin: 0; }
+    header { background: #004d40; color: white; text-align: center; padding: 1rem; }
+    .main { max-width: 900px; margin: auto; padding: 2rem; }
+    .avatar { display: flex; align-items: center; margin-bottom: 2rem; }
+    .avatar img { width: 120px; height: 120px; border-radius: 50%; margin-right: 1rem; animation: pulse 3s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .chat-box { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .chat-log { max-height: 250px; overflow-y: auto; margin-bottom: 1rem; }
+    .chat-log p { margin: 0.5rem 0; }
+    input[type='text'] { width: calc(100% - 48px); padding: 0.5rem; margin-right: 0.5rem; }
+    button { padding: 0.5rem 1rem; background: #004d40; color: white; border: none; cursor: pointer; }
+    .lang-toggle { text-align: right; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">Arclo Assist</h1>
+    <p id="subtitle">Digitale Unterstützung für barrierefreies Surfen</p>
+  </header>
+  <div class="main">
+    <div class="lang-toggle">
+      <label>Sprache:</label>
+      <button onclick="switchLang('de')">DE</button>
+      <button onclick="switchLang('en')">EN</button>
+    </div>
+
+    <div class="avatar">
+      <img src="https://cdn.pixabay.com/photo/2021/09/03/13/17/avatar-6594089_1280.png" alt="Arclo Avatar" />
+      <div>
+        <h2 id="greet">Hallo, ich bin Arclo!</h2>
+        <p id="intro">Ich helfe dir, dich hier zurechtzufinden.</p>
+      </div>
+    </div>
+
+    <div class="chat-box">
+      <div class="chat-log" id="chat"></div>
+      <input type="text" id="input" placeholder="Frage eingeben..." onkeypress="if(event.key==='Enter') respond()" />
+      <button onclick="startVoice()">🎤</button>
+    </div>
+  </div>
+
+  <script>
+    let lang = 'de';
+
+    const texts = {
+      de: {
+        greet: 'Hallo, ich bin Arclo!',
+        intro: 'Ich helfe dir, dich hier zurechtzufinden.',
+        subtitle: 'Digitale Unterstützung für barrierefreies Surfen'
+      },
+      en: {
+        greet: "Hello, I'm Arclo!",
+        intro: 'I help you navigate this website.',
+        subtitle: 'Digital support for accessible browsing'
+      }
+    };
+
+    function switchLang(l) {
+      lang = l;
+      document.getElementById('greet').innerText = texts[lang].greet;
+      document.getElementById('intro').innerText = texts[lang].intro;
+      document.getElementById('subtitle').innerText = texts[lang].subtitle;
+    }
+
+    async function respond(text) {
+      const chat = document.getElementById('chat');
+      const input = document.getElementById('input');
+      const msg = text || input.value.trim();
+      if (!msg) return;
+
+      chat.innerHTML += `<p><strong>Du:</strong> ${msg}</p>`;
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, lang })
+        });
+
+        const data = await res.json();
+        chat.innerHTML += `<p><strong>Arclo:</strong> ${data.reply}</p>`;
+        chat.scrollTop = chat.scrollHeight;
+      } catch (err) {
+        chat.innerHTML += `<p><strong>Arclo:</strong> Fehler beim Abrufen der Antwort.</p>`;
+      }
+    }
+
+    function startVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = lang === 'de' ? 'de-DE' : 'en-US';
+      recognition.start();
+      recognition.onresult = function (e) {
+        const speech = e.results[0][0].transcript;
+        respond(speech);
+      };
+      recognition.onerror = function (e) {
+        alert('Spracherkennung fehlgeschlagen: ' + e.error);
+      };
+    }
+  </script>
+</body>
+</html>
