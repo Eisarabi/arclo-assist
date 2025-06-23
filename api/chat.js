@@ -3,9 +3,8 @@ export default function handler(req, res) {
 
   const reply =
     lang === 'de'
-      ? `Du hast gefragt: "${message}". Leider ist GPT im Testmodus.`
-      : `You asked: "${message}". GPT is currently in test mode.`;
+      ? `Du hast gefragt: "${message}". Ich bin Arclo im Testmodus.`
+      : `You asked: "${message}". I'm Arclo running in test mode.`;
 
   res.status(200).json({ reply });
 }
-
