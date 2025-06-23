@@ -21,5 +21,12 @@ export default async function handler(req, res) {
   });
 
   const data = await response.json();
-  res.status(200).json({ reply: data.choices?.[0]?.message?.content });
+  const data = await response.json();
+
+if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+  res.status(200).json({ reply: data.choices[0].message.content });
+} else {
+  res.status(500).json({ reply: '❌ Es konnte keine Antwort generiert werden.' });
+}
+
 }
